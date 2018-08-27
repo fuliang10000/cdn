@@ -1,18 +1,18 @@
 <?php
 /*需要填写你的密钥，可从  https://console.qcloud.com/capi 获取 SecretId 及 $secretKey*/
-$secretKey='50vgHh097zgDbt22rW1fMArhruqeImR0';
-$secretId='AKIDrjRyLXAQ6c1GNKvkCTZWDk7JLDuSFENL';
-$action='FlushOrPushOverall';
+$secretKey = '50vgHh097zgDbt22rW1fMArhruqeImR0';
+$secretId = 'AKIDrjRyLXAQ6c1GNKvkCTZWDk7JLDuSFENL';
+$action = 'FlushOrPushOverall';
 
 
 /*****************参数************************/
 /**
-参数名          类型        是否必填        描述
-command         str           是           指定要进行的操作："push"：表示预热；"flush 表示刷新
-urls            str           是           提交的刷新/预热URL清单
-type            str           是           刷新/预热类型："dir"：表示目录；"url"： 表示资源全路径；预热暂时不支持目录方式
-mainland        int           否           填充 1 表示刷新/预热国内；若不填充则表示国内无提交操作
-oversea         int           否           填充 1 表示刷新/预热海外；若不填充则表示海外无提交操作
+ * 参数名          类型        是否必填        描述
+ * command         str           是           指定要进行的操作："push"：表示预热；"flush 表示刷新
+ * urls            str           是           提交的刷新/预热URL清单
+ * type            str           是           刷新/预热类型："dir"：表示目录；"url"： 表示资源全路径；预热暂时不支持目录方式
+ * mainland        int           否           填充 1 表示刷新/预热国内；若不填充则表示国内无提交操作
+ * oversea         int           否           填充 1 表示刷新/预热海外；若不填充则表示海外无提交操作
  **/
 
 /*参数*/
@@ -23,29 +23,29 @@ $PRIVATE_PARAMS = array(
     'mainland' => '1',
 );
 
-$HttpUrl="cdn.api.qcloud.com";
+$HttpUrl = "cdn.api.qcloud.com";
 
 /*除非有特殊说明，如MultipartUploadVodFile，其它接口都支持GET及POST*/
-$HttpMethod="POST";
+$HttpMethod = "POST";
 
 /*是否https协议，大部分接口都必须为https，只有少部分接口除外（如MultipartUploadVodFile）*/
-$isHttps =true;
+$isHttps = true;
 
 /*下面这五个参数为所有接口的 公共参数；对于某些接口没有地域概念，则不用传递Region（如DescribeDeals）*/
 $COMMON_PARAMS = array(
     'Nonce' => rand(),
-    'Timestamp' =>time(),
-    'Action' =>$action,
+    'Timestamp' => time(),
+    'Action' => $action,
     'SecretId' => $secretId,
 );
 
 /***********************************************************************************/
 
-CreateRequest($HttpUrl,$HttpMethod,$COMMON_PARAMS,$secretKey, $PRIVATE_PARAMS, $isHttps);
+CreateRequest($HttpUrl, $HttpMethod, $COMMON_PARAMS, $secretKey, $PRIVATE_PARAMS, $isHttps);
 
-function CreateRequest($HttpUrl,$HttpMethod,$COMMON_PARAMS,$secretKey, $PRIVATE_PARAMS, $isHttps)
+function CreateRequest($HttpUrl, $HttpMethod, $COMMON_PARAMS, $secretKey, $PRIVATE_PARAMS, $isHttps)
 {
-    $FullHttpUrl = $HttpUrl."/v2/index.php";
+    $FullHttpUrl = $HttpUrl . "/v2/index.php";
 
     /***************对请求参数 按参数名 做字典序升序排列，注意此排序区分大小写*************/
     $ReqParaArray = array_merge($COMMON_PARAMS, $PRIVATE_PARAMS);
@@ -57,24 +57,21 @@ function CreateRequest($HttpUrl,$HttpMethod,$COMMON_PARAMS,$secretKey, $PRIVATE_
      * &SecretId=AKIDz8krbsJ5yKBZQ    ·1pn74WFkmLPx3gnPhESA&Timestamp=1408704141
      * &instanceIds.0=qcvm12345&instanceIds.1=qcvm56789
      * ****************************************************************************/
-    $SigTxt = $HttpMethod.$FullHttpUrl."?";
+    $SigTxt = $HttpMethod . $FullHttpUrl . "?";
 
     $isFirst = true;
-    foreach ($ReqParaArray as $key => $value)
-    {
-        if (!$isFirst)
-        {
-            $SigTxt = $SigTxt."&";
+    foreach ($ReqParaArray as $key => $value) {
+        if (!$isFirst) {
+            $SigTxt = $SigTxt . "&";
         }
-        $isFirst= false;
+        $isFirst = false;
 
         /*拼接签名原文时，如果参数名称中携带_，需要替换成.*/
-        if(strpos($key, '_'))
-        {
+        if (strpos($key, '_')) {
             $key = str_replace('_', '.', $key);
         }
 
-        $SigTxt=$SigTxt.$key."=".$value;
+        $SigTxt = $SigTxt . $key . "=" . $value;
     }
 
     /*********************根据签名原文字符串 $SigTxt，生成签名 Signature******************/
@@ -82,40 +79,30 @@ function CreateRequest($HttpUrl,$HttpMethod,$COMMON_PARAMS,$secretKey, $PRIVATE_
 
 
     /***************拼接请求串,对于请求参数及签名，需要进行urlencode编码********************/
-    $Req = "Signature=".urlencode($Signature);
-    foreach ($ReqParaArray as $key => $value)
-    {
-        $Req=$Req."&".$key."=".urlencode($value);
+    $Req = "Signature=" . urlencode($Signature);
+    foreach ($ReqParaArray as $key => $value) {
+        $Req = $Req . "&" . $key . "=" . urlencode($value);
     }
 
     /*********************************发送请求********************************/
-    if($HttpMethod === 'GET')
-    {
-        if($isHttps === true)
-        {
-            $Req="https://".$FullHttpUrl."?".$Req;
-        }
-        else
-        {
-            $Req="http://".$FullHttpUrl."?".$Req;
+    if ($HttpMethod === 'GET') {
+        if ($isHttps === true) {
+            $Req = "https://" . $FullHttpUrl . "?" . $Req;
+        } else {
+            $Req = "http://" . $FullHttpUrl . "?" . $Req;
         }
 
         $Rsp = file_get_contents($Req);
 
-    }
-    else
-    {
-        if($isHttps === true)
-        {
-            $Rsp= SendPost("https://".$FullHttpUrl,$Req,$isHttps);
-        }
-        else
-        {
-            $Rsp= SendPost("http://".$FullHttpUrl,$Req,$isHttps);
+    } else {
+        if ($isHttps === true) {
+            $Rsp = SendPost("https://" . $FullHttpUrl, $Req, $isHttps);
+        } else {
+            $Rsp = SendPost("http://" . $FullHttpUrl, $Req, $isHttps);
         }
     }
 
-    var_export(json_decode($Rsp,true));
+    var_export(json_decode($Rsp, true));
 }
 
 function SendPost($FullHttpUrl, $Req, $isHttps)
@@ -128,8 +115,8 @@ function SendPost($FullHttpUrl, $Req, $isHttps)
     curl_setopt($ch, CURLOPT_URL, $FullHttpUrl);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     if ($isHttps === true) {
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER,  false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST,  false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
     }
 
     $result = curl_exec($ch);
